@@ -28,6 +28,6 @@ func TestVerify(t *testing.T) {
 	// Assertions
 	if assert.NoError(t, Verify(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, verifyJSON, rec.Body.String())
+		assert.Equal(t, "true", rec.Body.String())
 	}
 }
