@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"gopkg.in/go-playground/validator.v9"
-	"verify/controllers"
+	"claimcheck/controllers"
 )
 
 type CustomValidator struct {
