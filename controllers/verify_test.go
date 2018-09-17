@@ -33,10 +33,9 @@ func TestVerifyPost(t *testing.T) {
 		`{` +
 			`"asset_issuer":"GAQ6EUNL46K4BYH5N7YG5VPOF6OD5FTSP5M3HYGLEGQ6SLYDU7OB4M45",` +
 			`"asset_code":"WOOLLY",` +
-			`"secret":"EC9CB7E10C0BDE144FFF36128EEE7B5B59E49A1BC7710FDAB583735880DB0ECA",` +
 			`"transaction_hash":"54913d4c6069240f983b8609160b0d5876c57e0e864eeb93f75872f3a798c910",` +
 			`"verified":true,` +
-			`"amount":10000000` +
+			`"amount":"10000000"` +
 		`}`
 
 	// Setup

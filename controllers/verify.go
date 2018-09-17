@@ -11,6 +11,7 @@ import (
 	hProtocol "github.com/stellar/go/protocols/horizon"
 	"github.com/stellar/go/xdr"
 	"net/http"
+	"strconv"
 )
 
 // Define the input
@@ -24,10 +25,9 @@ type verifyPostInput struct {
 type verifyPostOutput struct{
 	AssetIssuer   	string  	`json:"asset_issuer"`
 	AssetCode   	string  	`json:"asset_code"`
-	Secret    		string  	`json:"secret"`
 	TransactionHash string  	`json:"transaction_hash"`
 	Verified		bool    	`json:"verified"`
-	Amount			xdr.Int64   `json:"amount"`
+	Amount			string  	`json:"amount"`
 }
 
 func VerifyPost(c echo.Context) error {
@@ -88,10 +88,9 @@ func getOutput(i *verifyPostInput, envelopeXdr string) (*verifyPostOutput, error
 	o := &verifyPostOutput{
 		AssetIssuer: i.AssetIssuer,
 		AssetCode: i.AssetCode,
-		Secret: i.Secret,
 		TransactionHash: i.TransactionHash,
 		Verified: false,
-		Amount: 0,
+		Amount: "0",
 	}
 
 	// unmarshal envelopeXdr into TransactionEnvelope
@@ -106,7 +105,8 @@ func getOutput(i *verifyPostInput, envelopeXdr string) (*verifyPostOutput, error
 		return o, err
 	}
 
-	o.Amount = tx.Tx.Operations[0].Body.PaymentOp.Amount
+	amount := tx.Tx.Operations[0].Body.PaymentOp.Amount
+	o.Amount = strconv.FormatInt(int64(amount), 10)
 	return o, nil
 }
 
@@ -126,7 +126,7 @@ func verify(i *verifyPostInput, tx xdr.TransactionEnvelope) (bool, error) {
 	// verify the transaction sent the asset back its the issuer
 	payment := tx.Tx.Operations[0].Body.PaymentOp
 	if !payment.Destination.Equals(payment.Asset.AlphaNum12.Issuer) {
-		return false, errors.New("the payment operation did not return the asset its issuer")
+		return false, errors.New("the payment operation did not return the asset to its issuer")
 	}
 
 	// ensure the asset issuer matches the input
