@@ -1,6 +1,11 @@
 # https://gitlab.com/help/ci/docker/using_docker_build.md
 # sudo gitlab-runner exec docker --docker-privileged build
 image: docker:stable
+stages:
+- test
+- build
+- deploy
+
 services:
 - docker:dind
 
@@ -11,11 +16,20 @@ variables:
 
 before_script:
 - export
-- docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+test:
+  stage: test
+  image: golang:1.11
+  script:
+  - go build ./...
+  - go test ./...
+  tags:
+  - local
 
 build:
   stage: build
   script:
+  - docker login -u gitlab-ci-token --password-stdin $CI_JOB_TOKEN $CI_REGISTRY
   - docker build -t $IMAGE_TAG .
   - docker push $IMAGE_TAG
   tags:

@@ -36,7 +36,7 @@ func main() {
 	limiter := tollbooth.NewLimiter(1, nil)
 
 	// Key Routes
-	e.POST("/", controllers.VerifyPost, tollbooth_echo.LimitHandler(limiter))
+	e.POST("/", controllers.ClaimCheck, tollbooth_echo.LimitHandler(limiter))
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
