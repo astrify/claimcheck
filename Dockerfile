@@ -15,4 +15,5 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /go/bin/
 COPY --from=builder /go/bin/claimcheck .
 
-CMD ["./app"]
+EXPOSE 1323
+ENTRYPOINT ["/go/bin/claimcheck"]
