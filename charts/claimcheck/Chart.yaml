@@ -1,7 +1,7 @@
 apiVersion: v1
-description: A Helm chart for UI service
-name: ui
+description: A Helm chart for claimcheck service
+name: claimcheck
 version: 0.1.0
 maintainers:
-- name: UI dev team
-  email: ui-dev@mail.com
+- name: astrify dev team
+  email: dev@mail.com

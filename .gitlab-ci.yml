@@ -4,26 +4,29 @@ stages:
 - release
 - deploy
 
+services:
+- docker:dind
+
 variables:
   # GKE info
-  CLUSTER_NAME: my-cluster
-  ZONE: europe-west1-b
-  PROJECT: example-123456
-  DOMAIN_NAME: devops-by-practice.fun # application domain name
+  CLUSTER_NAME: test-cluster
+  ZONE: us-central1-a
+  PROJECT: astrify-cluster
+  DOMAIN_NAME: claimcheck.astrify.com # application domain name
 
-  CHART_PATH: ./charts/ui
-  CONTAINER_IMAGE: artemkin/ui
+  CHART_PATH: ./charts/claimcheck
+  CONTAINER_IMAGE: registry.gitlab.com/astrify/stellar-claimcheck
   CONTAINER_IMAGE_BUILT: ${CONTAINER_IMAGE}:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}
   CONTAINER_IMAGE_LATEST: ${CONTAINER_IMAGE}:latest
-  CI_REGISTRY: index.docker.io  # container registry URL
+  CI_REGISTRY: registry.gitlab.com  # container registry URL
   DOCKER_DRIVER: overlay2
-  DOCKER_HOST: tcp://localhost:2375  # required since we use dind
+  DOCKER_HOST: tcp://docker:2375  # required since we use dind
 
   SERVICE_ACCOUNT: /etc/deploy/sa.json
-  STAGE_NAMESPACE: raddit-stage
-  PROD_NAMESPACE: raddit-prod
-  STAGE_RELEASE_NAME: raddit-stage-ui
-  PROD_RELEASE_NAME: raddit-prod-ui
+  STAGE_NAMESPACE: astrify-stage
+  PROD_NAMESPACE: astrify-prod
+  STAGE_RELEASE_NAME: astrify-stage-claimcheck
+  PROD_RELEASE_NAME: astrify-prod-claimcheck
 
 # build container image
 build:
@@ -34,7 +37,7 @@ build:
   script:
   - echo "Building Dockerfile-based application..."
   - docker build -t ${CONTAINER_IMAGE_BUILT} .
-  - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
+  - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
   - echo "Pushing to the Container Registry..."
   - docker push ${CONTAINER_IMAGE_BUILT}
 
@@ -52,10 +55,10 @@ release:
   services:
   - docker:dind
   script:
+  - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
   - echo "Pulling docker image from Container Registry"
   - docker pull ${CONTAINER_IMAGE_BUILT}
   - echo "Logging to Container Registry at ${CI_REGISTRY}"
-  - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
   - echo "Pushing to Container Registry..."
   - docker tag ${CONTAINER_IMAGE_BUILT} ${CONTAINER_IMAGE}:$(cat VERSION)
   - docker push ${CONTAINER_IMAGE}:$(cat VERSION)
