@@ -29,8 +29,15 @@ test:
 build:
   stage: build
   script:
-  - docker login -u gitlab-ci-token --password-stdin $CI_JOB_TOKEN $CI_REGISTRY
+  - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
   - docker build -t $IMAGE_TAG .
   - docker push $IMAGE_TAG
   tags:
   - local
+
+deploy to staging:
+  stage: deploy
+  script: make deploy
+  environment:
+    name: claimcheck.staging
+    url: https://staging.claimcheck.app/
