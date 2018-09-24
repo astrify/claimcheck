@@ -14,7 +14,7 @@ envVars:
 
 service:
   name: claimcheck
-  type: ClusterIP
+  type: NodePort
   externalPort: 1323
   internalPort: 1323
 
