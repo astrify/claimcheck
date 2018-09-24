@@ -35,7 +35,6 @@ build:
   services:
   - docker:dind
   script:
-  - export
   - echo "Building Dockerfile-based application..."
   - docker build -t ${CONTAINER_IMAGE_BUILT} .
   - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
@@ -84,10 +83,6 @@ deploy_staging:
     --set image.tag=$(cat VERSION)
     --set ingress.enabled=false
     --set image.repository=${CONTAINER_IMAGE}
-    --set imageCredentials.name=gitlab-deploy-token
-    --set imageCredentials.registry=${CI_REGISTRY}
-    --set imageCredentials.username=${CI_DEPLOY_USER}
-    --set imageCredentials.password=${CI_DEPLOY_PASSWORD}
     --wait
     --namespace=${STAGE_NAMESPACE}
     ${STAGE_RELEASE_NAME} ${CHART_PATH}
@@ -112,10 +107,6 @@ deploy_prod:
     --set image.repository=${CONTAINER_IMAGE}
     --set ingress.hosts[0]=${DOMAIN_NAME}
     --set ingress.tls[0].secretName=ui-tls,ingress.tls[0].hosts={${DOMAIN_NAME}}
-    --set imageCredentials.name=gitlab-deploy-token
-    --set imageCredentials.registry=${CI_REGISTRY}
-    --set imageCredentials.username=${CI_DEPLOY_USER}
-    --set imageCredentials.password=${CI_DEPLOY_PASSWORD}
     --wait
     --namespace=${PROD_NAMESPACE}
     ${PROD_RELEASE_NAME} ${CHART_PATH}

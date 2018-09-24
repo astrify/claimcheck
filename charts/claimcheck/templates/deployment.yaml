@@ -42,5 +42,3 @@ spec:
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
     {{- end }}
-imagePullSecrets:
-    - name: {{ .Values.imageCredentials.name }}
