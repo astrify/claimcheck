@@ -7,6 +7,11 @@ image:
   repository: dockerbub/ui
   tag: latest
   pullPolicy: IfNotPresent
+imageCredentials:
+  name: <registry_name>_credentials
+  registry: <repo>
+  username: <username>
+  password: <pw>
 
 envVars:
   POST_SERVICE_HOST: post
