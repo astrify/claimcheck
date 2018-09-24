@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"gopkg.in/go-playground/validator.v9"
 	"claimcheck/controllers"
+	"net/http"
 )
 
 type CustomValidator struct {
@@ -37,6 +38,8 @@ func main() {
 
 	// Key Routes
 	e.POST("/", controllers.ClaimCheck, tollbooth_echo.LimitHandler(limiter))
+	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "ready") })
+
 
 	// Start server
 	e.Logger.Fatal(e.Start(":1323"))
