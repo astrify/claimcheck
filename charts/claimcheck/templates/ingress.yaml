@@ -1,6 +1,4 @@
 {{- if .Values.ingress.enabled -}}
-{{- $serviceName := include "ui.fullname" . -}}
-{{- $servicePort := .Values.service.externalPort -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -11,22 +9,30 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    {{- range $key, $value := .Values.ingress.annotations }}
-      {{ $key }}: {{ $value | quote }}
-    {{- end }}
+    kubernetes.io/ingress.global-static-ip-name: "claimcheck-static-ip"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+    kubernetes.io/ingress.class: "gce"
 spec:
   rules:
-    {{- range $host := .Values.ingress.hosts }}
-    - host: {{ $host }}
+    - host: claimcheck.astrify.com
       http:
         paths:
           - path: /*
             backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
-    {{- end -}}
+              serviceName: {{ template "ui.name" . }}
+              servicePort: 1323
+  rules:
+  - host: claimcheck.astrify.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: claimcheck-svc
+          servicePort: claimcheck-port
   {{- if .Values.ingress.tls }}
   tls:
-{{ toYaml .Values.ingress.tls | indent 4 }}
+  - hosts:
+    - claimcheck.astrify.com
+    secretName: {{ .Release.Name }}-crt
   {{- end -}}
 {{- end -}}

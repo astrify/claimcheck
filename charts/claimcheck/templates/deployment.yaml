@@ -19,15 +19,9 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if .Values.envVars}}
-          env:
-          {{- range $key, $value := .Values.envVars }}
-            - name: "{{ $key }}"
-              value: "{{ $value }}"
-          {{- end }}
-        {{- end }}
           ports:
-            - containerPort: {{ .Values.service.internalPort }}
+          - name: http
+            containerPort: {{ .Values.service.internalPort }}
           livenessProbe:
             httpGet:
               path: /
@@ -36,9 +30,10 @@ spec:
             httpGet:
               path: /
               port: {{ .Values.service.internalPort }}
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- if .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
-    {{- end }}
+          {{- if .Values.envVars}}
+          env:
+          {{- range $key, $value := .Values.envVars }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+          {{- end }}
