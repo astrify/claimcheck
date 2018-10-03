@@ -68,6 +68,7 @@ deploy_prod:
   image: artemkin/helm-gke:1.0
   before_script:
   - mkdir -p /etc/deploy
+  - echo $CI_REGISTRY_PASSWORD | docker login --username=$CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   - echo ${service_account} | base64 -d > ${SERVICE_ACCOUNT}
   - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT}
   - gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE} --project ${PROJECT}
