@@ -12,3 +12,9 @@ service:
   type: NodePort
   externalPort: 1323
   internalPort: 1323
+
+imageCredentials:
+  name: gitlab-registry-secret
+  registry: registry.gitlab.com
+  username: user
+  password: pass
