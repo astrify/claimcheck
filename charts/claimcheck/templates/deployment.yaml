@@ -27,11 +27,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: {{ .Values.service.internalPort }}
+              port: {{ .Values.service.externalPort }}
           readinessProbe:
             httpGet:
               path: /
-              port: {{ .Values.service.internalPort }}
+              port: {{ .Values.service.externalPort }}
           {{- if .Values.envVars}}
           env:
           {{- range $key, $value := .Values.envVars }}

@@ -43,7 +43,7 @@ release:
   - echo $CI_REGISTRY_PASSWORD | docker login --username=$CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   - echo "Pulling docker image from Container Registry"
   - docker pull ${CONTAINER_IMAGE_BUILT}
-  - echo "Logging to Container Registry at ${CI_REGISTRY}"
+  - echo "Logging to Container Registry at $CI_REGISTRY"
   - echo "Pushing to Container Registry..."
   - docker tag ${CONTAINER_IMAGE_BUILT} $CONTAINER_IMAGE:$(cat VERSION)
   - docker push $CONTAINER_IMAGE:$(cat VERSION)
@@ -66,6 +66,7 @@ deploy_prod:
   script:
   - helm upgrade --install
     --set image.tag=$(cat VERSION)
+    --set imageCredentials.name=gitlab-registry-$PROD_RELEASE_NAME
     --set imageCredentials.username=$CI_REGISTRY_USER
     --set imageCredentials.password=$CI_REGISTRY_PASSWORD
     --wait
