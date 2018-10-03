@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: claimcheck-svc
+  name: {{ .Values.service.name }}
   labels:
-    run: claimcheck-svc
+    run: {{ .Values.service.name }}
 spec:
-  type: NodePort
+  type: {{ .Values.service.type }}
   ports:
-  - port: 80 # On which port you want to publish the website dep
-    targetPort: 1323 # The port exposed by your container
-    protocol: TCP
+  - port: {{ .Values.service.externalPort }} # On which port you want to publish the website dep
+    targetPort: {{ .Values.service.internalPort }} # The port exposed by your container
+    protocol: {{ .Values.service.protocol }}
   selector:
     app: {{ template "ui.name" . }}
     release: {{ .Release.Name }}

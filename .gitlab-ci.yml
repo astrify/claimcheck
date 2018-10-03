@@ -8,20 +8,11 @@ services:
 - docker:dind
 
 variables:
-  CLUSTER_NAME: test-cluster
-  ZONE: us-central1-a
-  PROJECT: astrify-test-1
-  DOMAIN_NAME: claimcheck.astrify.com
-
-  CONTAINER_IMAGE: registry.gitlab.com/astrify/claimcheck
-  CONTAINER_IMAGE_BUILT: ${CONTAINER_IMAGE}:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}
-  CONTAINER_IMAGE_LATEST: ${CONTAINER_IMAGE}:latest
+  CONTAINER_IMAGE_BUILT: $CONTAINER_IMAGE:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}
+  CONTAINER_IMAGE_LATEST: $CONTAINER_IMAGE:latest
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375  # required since we use dind
-
   SERVICE_ACCOUNT: /etc/deploy/sa.json
-  PROD_NAMESPACE: default
-  PROD_RELEASE_NAME: astrify-prod-claimcheck
 
 test:
   stage: test
@@ -54,9 +45,9 @@ release:
   - docker pull ${CONTAINER_IMAGE_BUILT}
   - echo "Logging to Container Registry at ${CI_REGISTRY}"
   - echo "Pushing to Container Registry..."
-  - docker tag ${CONTAINER_IMAGE_BUILT} ${CONTAINER_IMAGE}:$(cat VERSION)
-  - docker push ${CONTAINER_IMAGE}:$(cat VERSION)
-  - docker tag ${CONTAINER_IMAGE}:$(cat VERSION) ${CONTAINER_IMAGE_LATEST}
+  - docker tag ${CONTAINER_IMAGE_BUILT} $CONTAINER_IMAGE:$(cat VERSION)
+  - docker push $CONTAINER_IMAGE:$(cat VERSION)
+  - docker tag $CONTAINER_IMAGE:$(cat VERSION) ${CONTAINER_IMAGE_LATEST}
   - docker push ${CONTAINER_IMAGE_LATEST}
   - echo ""
   only:
@@ -70,7 +61,7 @@ deploy_prod:
   - mkdir -p /etc/deploy
   - echo ${service_account} | base64 -d > ${SERVICE_ACCOUNT}
   - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT}
-  - gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE} --project ${PROJECT}
+  - gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project $PROJECT
   - helm init --client-only
   script:
   - helm upgrade --install
@@ -78,11 +69,10 @@ deploy_prod:
     --set imageCredentials.username=$CI_REGISTRY_USER
     --set imageCredentials.password=$CI_REGISTRY_PASSWORD
     --wait
-    --namespace=${PROD_NAMESPACE}
-    ${PROD_RELEASE_NAME} ./charts/claimcheck
+    --namespace=$PROD_NAMESPACE
+    $PROD_RELEASE_NAME ./charts/claimcheck
   environment:
     name: production
     url: https://${DOMAIN_NAME}
-  when: manual
   only:
   - master

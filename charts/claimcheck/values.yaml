@@ -8,10 +8,11 @@ envVars:
   APP_ENV: test
 
 service:
-  name: claimcheck
+  name: claimcheck-svc
   type: NodePort
   externalPort: 1323
   internalPort: 1323
+  protocol: TCP
 
 imageCredentials:
   name: gitlab-registry-secret
