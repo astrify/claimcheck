@@ -1,4 +1,4 @@
-package controllers
+package main
 
 import (
 	"encoding/json"
@@ -13,12 +13,12 @@ import (
 	"testing"
 )
 
-type CustomValidator struct {
-validator *validator.Validate
+type TestValidator struct {
+	validator *validator.Validate
 }
 
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
+func (tv *TestValidator) Validate(i interface{}) error {
+	return tv.validator.Struct(i)
 }
 
 func testGetInput1() *input {

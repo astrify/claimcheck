@@ -1,6 +1,6 @@
 replicaCount: 2
 image:
-  repository: registry.gitlab.com/astrify/stellar-claimcheck
+  repository: registry.gitlab.com/astrify/claimcheck
   tag: latest
   pullPolicy: Always
 
@@ -12,14 +12,3 @@ service:
   type: NodePort
   externalPort: 1323
   internalPort: 1323
-
-nodeSelector:
-  cloud.google.com/gke-nodepool: default-pool
-
-ingress:
-  enabled: true
-  host: astrify.com
-  tls:
-    - secretName: claimcheck-tls
-      hosts:
-        - astrify.com

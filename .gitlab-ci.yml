@@ -8,54 +8,48 @@ services:
 - docker:dind
 
 variables:
-  # GKE info
   CLUSTER_NAME: test-cluster
   ZONE: us-central1-a
-  PROJECT: astrify-cluster
-  DOMAIN_NAME: claimcheck.astrify.com # application domain name
+  PROJECT: astrify-test-1
+  DOMAIN_NAME: claimcheck.astrify.com
 
-  CHART_PATH: ./charts/claimcheck
-  CONTAINER_IMAGE: registry.gitlab.com/astrify/stellar-claimcheck
+  CONTAINER_IMAGE: registry.gitlab.com/astrify/claimcheck
   CONTAINER_IMAGE_BUILT: ${CONTAINER_IMAGE}:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}
   CONTAINER_IMAGE_LATEST: ${CONTAINER_IMAGE}:latest
-  CI_REGISTRY: registry.gitlab.com  # container registry URL
   DOCKER_DRIVER: overlay2
   DOCKER_HOST: tcp://docker:2375  # required since we use dind
 
   SERVICE_ACCOUNT: /etc/deploy/sa.json
-  STAGE_NAMESPACE: astrify-stage
-  PROD_NAMESPACE: astrify-prod
-  STAGE_RELEASE_NAME: astrify-stage-claimcheck
+  PROD_NAMESPACE: default
   PROD_RELEASE_NAME: astrify-prod-claimcheck
 
-# build container image
-build:
-  stage: build
-  image: docker:latest
-  services:
-  - docker:dind
-  script:
-  - echo "Building Dockerfile-based application..."
-  - docker build -t ${CONTAINER_IMAGE_BUILT} .
-  - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
-  - echo "Pushing to the Container Registry..."
-  - docker push ${CONTAINER_IMAGE_BUILT}
-
-# run tests against built image
 test:
   stage: test
   script:
   - exit 0
 
+# build container image
+build:
+  stage: build
+  image: docker:stable
+  services:
+  - docker:dind
+  script:
+  - echo "Building Dockerfile-based application..."
+  - docker build -t ${CONTAINER_IMAGE_BUILT} .
+  - echo $CI_REGISTRY_PASSWORD | docker login --username=$CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  - echo "Pushing to the Container Registry..."
+  - docker push ${CONTAINER_IMAGE_BUILT}
+
 # tag container image that passed the tests successfully
 # and push it to the registry
 release:
   stage: release
-  image: docker:latest
+  image: docker:stable
   services:
   - docker:dind
   script:
-  - echo $CI_JOB_TOKEN | docker login --username=gitlab-ci-token --password-stdin $CI_REGISTRY
+  - echo $CI_REGISTRY_PASSWORD | docker login --username=$CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   - echo "Pulling docker image from Container Registry"
   - docker pull ${CONTAINER_IMAGE_BUILT}
   - echo "Logging to Container Registry at ${CI_REGISTRY}"
@@ -65,29 +59,6 @@ release:
   - docker tag ${CONTAINER_IMAGE}:$(cat VERSION) ${CONTAINER_IMAGE_LATEST}
   - docker push ${CONTAINER_IMAGE_LATEST}
   - echo ""
-  only:
-  - master
-
-# deploy to staging environment
-deploy_staging:
-  stage: deploy
-  image: artemkin/helm-gke:1.0
-  before_script:
-  - mkdir -p /etc/deploy
-  - echo ${service_account} | base64 -d > ${SERVICE_ACCOUNT}
-  - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT}
-  - gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${ZONE} --project ${PROJECT}
-  - helm init --client-only
-  script:
-  - helm upgrade --install
-    --set image.tag=$(cat VERSION)
-    --set ingress.enabled=false
-    --set image.repository=${CONTAINER_IMAGE}
-    --wait
-    --namespace=${STAGE_NAMESPACE}
-    ${STAGE_RELEASE_NAME} ${CHART_PATH}
-  environment:
-    name: staging
   only:
   - master
 
@@ -104,12 +75,9 @@ deploy_prod:
   script:
   - helm upgrade --install
     --set image.tag=$(cat VERSION)
-    --set image.repository=${CONTAINER_IMAGE}
-    --set ingress.hosts[0]=${DOMAIN_NAME}
-    --set ingress.tls[0].secretName=ui-tls,ingress.tls[0].hosts={${DOMAIN_NAME}}
     --wait
     --namespace=${PROD_NAMESPACE}
-    ${PROD_RELEASE_NAME} ${CHART_PATH}
+    ${PROD_RELEASE_NAME} ./charts/claimcheck
   environment:
     name: production
     url: https://${DOMAIN_NAME}

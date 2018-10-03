@@ -3,17 +3,13 @@ kind: Service
 metadata:
   name: claimcheck-svc
   labels:
-    app: {{ template "ui.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    run: claimcheck-svc
 spec:
-  type: {{ .Values.service.type }}
+  type: NodePort
   ports:
-    - port: {{ .Values.service.externalPort }}
-      targetPort: {{ .Values.service.internalPort }}
-      protocol: TCP
-      name: claimcheck-port
+  - port: 80 # On which port you want to publish the website dep
+    targetPort: 1323 # The port exposed by your container
+    protocol: TCP
   selector:
     app: {{ template "ui.name" . }}
     release: {{ .Release.Name }}
