@@ -7,7 +7,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.externalPort }} # On which port you want to publish the website dep
+  - port: 80 # On which port you want to publish the website dep
     targetPort: {{ .Values.service.internalPort }} # The port exposed by your container
     protocol: {{ .Values.service.protocol }}
   selector:
