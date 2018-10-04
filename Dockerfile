@@ -1,5 +1,7 @@
 # https://github.com/alextanhongpin/go-docker-multi-stage-build
-FROM golang:latest as builder
+FROM golang:alpine as builder
+
+RUN apk add --no-cache git
 
 WORKDIR /go/bin/
 

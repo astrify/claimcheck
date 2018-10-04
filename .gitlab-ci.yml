@@ -27,7 +27,7 @@ build:
   - docker:dind
   script:
   - echo "Building Dockerfile-based application..."
-  - docker build -t ${CONTAINER_IMAGE_BUILT} .
+  - docker build -t ${CONTAINER_IMAGE_BUILT} --cache-from $CONTAINER_IMAGE:latest .
   - echo $CI_REGISTRY_PASSWORD | docker login --username=$CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   - echo "Pushing to the Container Registry..."
   - docker push ${CONTAINER_IMAGE_BUILT}
